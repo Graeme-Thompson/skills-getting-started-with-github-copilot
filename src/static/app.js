@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
+  function refreshActivities() {
+    activitiesList.innerHTML = "";
+    activitySelect.innerHTML = `<option value="">-- Select an activity --</option>`;
+    fetchActivities();
+  }
+
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
@@ -52,9 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 { method: "DELETE" }
               );
               if (res.ok) {
-                activitiesList.innerHTML = "";
-                activitySelect.innerHTML = `<option value="">-- Select an activity --</option>`;
-                fetchActivities();
+                refreshActivities();
               }
             } catch (err) {
               console.error("Error removing participant:", err);
@@ -97,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        refreshActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
