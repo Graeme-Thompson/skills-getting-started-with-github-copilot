@@ -20,12 +20,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        const participantItems = details.participants.length > 0
+          ? details.participants.map(p =>
+              `<li class="participant-item" data-email="${p}" data-activity="${name}">
+                <span>${p}</span>
+                <button class="delete-participant" title="Unregister" aria-label="Unregister ${p}">&#x1F5D1;</button>
+              </li>`
+            ).join("")
+          : `<li class="no-participants">No participants yet</li>`;
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <strong>Signed Up:</strong>
+            <ul class="participants-list">${participantItems}</ul>
+          </div>
         `;
+
+        // Attach delete handlers
+        activityCard.querySelectorAll(".delete-participant").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const li = btn.closest(".participant-item");
+            const email = li.dataset.email;
+            const activity = li.dataset.activity;
+            try {
+              const res = await fetch(
+                `/activities/${encodeURIComponent(activity)}/signup?email=${encodeURIComponent(email)}`,
+                { method: "DELETE" }
+              );
+              if (res.ok) {
+                activitiesList.innerHTML = "";
+                activitySelect.innerHTML = `<option value="">-- Select an activity --</option>`;
+                fetchActivities();
+              }
+            } catch (err) {
+              console.error("Error removing participant:", err);
+            }
+          });
+        });
 
         activitiesList.appendChild(activityCard);
 
